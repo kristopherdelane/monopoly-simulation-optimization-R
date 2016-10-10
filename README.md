@@ -13,4 +13,4 @@ Next run the Dice Optimization code. This will create a data frame with all poss
 
 It will then bring in the value for all 861 possible combinations of dice rolls based on the Rent value * the probabilty of landing on the space.
 
-
+Rolling two dice will produce a Normal curve over a long enough timeline. For this reason the rent values of Electric Company and Water Works are 7(the most probable dice roll) times 4, per the card.
