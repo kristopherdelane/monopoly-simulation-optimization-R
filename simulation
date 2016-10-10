@@ -1,0 +1,70 @@
+#Monopoly Simulation
+
+#First I make Dice Rolls. 
+#   Because I am only testing one person over 10000 dice rolls to see what spaces 
+#   are most popular I do not need to account for doubles.
+
+MonopolyBoard<-data.frame(space=0)
+
+#Initialize variables for movement around the board
+newSpace<-0
+currentSpace <- 0
+#Movement based on Chance and Community chest cards
+chance <-1
+comchest <-1
+#Tracking how often Chance, GoToJail, Community Chest spaces are landed on
+Chance7<-0
+Chance22<-0
+Chance36<-0
+ComChest2<-0
+ComChest17<-0
+ComChest33<-0
+GoToJail<-0
+JustVisiting<-0
+
+
+#Chance card actions based on what chance you land on
+chanceOptions7    <- c(0,24,11,12,15,7,7,10,4,7,7,5,39,7,7,7)
+chanceOptions22   <- c(0,24,11,28,25,22,22,10,19,22,22,5,39,22,22,22)
+chanceOptions36   <- c(0,24,11,12,5,36,36,10,33,36,36,5,39,36,36,36)
+
+#Commmunity Chest card actions based on what Community Chest You land on
+comchestOptions2  <- c(0,2,2,2,2,10,2,2,2,2,2,2,2,2,2,2,2)
+comchestOptions17 <- c(0,17,17,17,17,10,17,17,17,17,17,17,17,17,17,17,17)
+comchestOptions33 <- c(0,33,33,33,33,10,33,33,33,33,33,33,33,33,33,33,33)
+
+#Dice Rolling Fuction
+two.dice<- function(){
+  dice <- sample(1:6, size = 2, replace = TRUE)
+  return(sum(dice))
+}
+
+#Loop for simulation
+for(i in 1:100000){
+
+#Creating a variable which will calculate next placement after roll.
+newSpace <- currentSpace + two.dice()
+
+#If you passed go:
+if(newSpace>39){newSpace=newSpace-40}
+#If you landed on Chance:
+if(newSpace==7){newSpace<-chanceOptions7[chance];chance<-chance+1;Chance7<-Chance7+1}
+if(newSpace==22){newSpace<-chanceOptions22[chance];chance<-chance+1;Chance22<-Chance22+1}
+if(newSpace==36){newSpace<-chanceOptions36[chance];chance<-chance+1;Chance36<-Chance36+1}
+#If you landed on Community Chest
+if(newSpace==2){newSpace<-comchestOptions2[comchest];comchest<-comchest+1;ComChest2<-ComChest2+1}
+if(newSpace==17){newSpace<-comchestOptions17[comchest];comchest<-comchest+1;ComChest17<-ComChest17+1}
+if(newSpace==33){newSpace<-comchestOptions33[comchest];comchest<-comchest+1;ComChest33<-ComChest33+1}
+#If you landed on Go to Jail
+if(newSpace==30){newSpace<-10;GoToJail<-GoToJail+1}
+
+#Reseting the Chance and Community chest cards
+if(chance>16){chance<-1}
+if(comchest>17){comchest<-1}
+
+#Keeping track of all landings on the board.
+MonopolyBoard<- rbind(MonopolyBoard, data.frame(space=newSpace))
+
+#Reset before next loop
+currentSpace<-newSpace
+} 
