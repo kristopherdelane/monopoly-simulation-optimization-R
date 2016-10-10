@@ -9,7 +9,7 @@ property<-c(
 landing<-c(
 sum(MonopolyBoard$space==0),sum(MonopolyBoard$space==1),ComChest2,sum(MonopolyBoard$space==3),
 sum(MonopolyBoard$space==4),sum(MonopolyBoard$space==5),sum(MonopolyBoard$space==6),Chance7,
-sum(MonopolyBoard$space==8),sum(MonopolyBoard$space==9),sum(MonopolyBoard$space==10)-GoToJail,sum(MonopolyBoard$space==11),
+sum(MonopolyBoard$space==8),sum(MonopolyBoard$space==9),sum(MonopolyBoard$space==10),sum(MonopolyBoard$space==11),
 sum(MonopolyBoard$space==12),sum(MonopolyBoard$space==13),sum(MonopolyBoard$space==14),sum(MonopolyBoard$space==15),
 sum(MonopolyBoard$space==16),ComChest17,sum(MonopolyBoard$space==18),sum(MonopolyBoard$space==19),
 sum(MonopolyBoard$space==20),sum(MonopolyBoard$space==21),Chance22,sum(MonopolyBoard$space==23),
