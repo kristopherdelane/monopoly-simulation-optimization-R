@@ -1,0 +1,107 @@
+property<-c(
+"GO","MediterreanAve", "Com Chest 2", "BalticAve","IncomeTax", "ReadingRR",
+"OrientalAve", "Chance 7", "VermontAve", "ConneticutAve","Jail", "St.CharlesPlace", "ElectricCo", "StatesAve",
+"VirginiaAve", "PennsylvaniaRR", "St.JamesPlace","Com Chest 17", "TennesseeAve", "NewYorkAve","Free Parking", "KentuckyAve", 
+"Chance 22", "IndianaAve", "IllinoisAve", "BnORR", "AtlanticAve","VentnorAve", "WaterWorks", "MarvinGardens", "Go To Jail",
+"PacificAve", "NorthCarolinaAve", "Com Chest 33","PennsylvaniaAve", "ShortLineRR","Chance 36", "ParkPlace","LuxuryTax", "Boardwalk") 
+
+#Sum all spaces that were landed on Jail has Go to Jail from 30 removed from total.
+landing<-c(
+sum(MonopolyBoard$space==0),sum(MonopolyBoard$space==1),ComChest2,sum(MonopolyBoard$space==3),
+sum(MonopolyBoard$space==4),sum(MonopolyBoard$space==5),sum(MonopolyBoard$space==6),Chance7,
+sum(MonopolyBoard$space==8),sum(MonopolyBoard$space==9),sum(MonopolyBoard$space==10)-GoToJail,sum(MonopolyBoard$space==11),
+sum(MonopolyBoard$space==12),sum(MonopolyBoard$space==13),sum(MonopolyBoard$space==14),sum(MonopolyBoard$space==15),
+sum(MonopolyBoard$space==16),ComChest17,sum(MonopolyBoard$space==18),sum(MonopolyBoard$space==19),
+sum(MonopolyBoard$space==20),sum(MonopolyBoard$space==21),Chance22,sum(MonopolyBoard$space==23),
+sum(MonopolyBoard$space==24),sum(MonopolyBoard$space==25),sum(MonopolyBoard$space==26),sum(MonopolyBoard$space==27),
+sum(MonopolyBoard$space==28),sum(MonopolyBoard$space==29),GoToJail,sum(MonopolyBoard$space==31),
+sum(MonopolyBoard$space==32),ComChest33,sum(MonopolyBoard$space==34),sum(MonopolyBoard$space==35),
+Chance36,sum(MonopolyBoard$space==37),sum(MonopolyBoard$space==38),sum(MonopolyBoard$space==39)
+)
+
+#Find the Cost of Rent for each property
+Rent <- c(0,2,0,4,0,25,6,0,6,8,0,10,28,10,12,25,14,0,14,16,0,18,0,18,20,25,22,22,28,24,0,26,26,0,28,25,0,35,0,50)
+
+#Build a data frame with position on the board, property name, number of times it was landed on, 
+#    probability of landing, base rent, then a calculation of rent and landing probability.
+Monopoly<-data.frame(id=c(0:39))
+Monopoly$Property<-property
+Monopoly$Action<-landing
+Monopoly$Rent<-Rent
+Monopoly$Probability <- landing/100000
+Monopoly$Gain<- Monopoly$Rent*Monopoly$Probability
+
+save(MonopolyBoard, file ="MonopolyDiceRolls.Rda")
+save(Monopoly, file ="MonopolySimulation.Rda")
+
+#For Optimization I need all available dice Rolls
+i<-1
+S <- 6 
+N <- 2 
+n <- choose(S+N-1,N) 
+outcomes <- t(combn(S+N-1,N,sort)) - matrix(rep(c(0:(N-1)),each=n),nrow=n)
+
+#outcomes provides me with all possible single dice combinations of a single roll. These are placed in a dataframe 
+DiceOptimize<-as.data.frame(outcomes)
+#remove all doubles.
+DiceOptimize<-DiceOptimize[!(DiceOptimize$V1==DiceOptimize$V2),]
+#Add columns for when we add in doubles with rbind
+DiceOptimize$V3<-NA
+DiceOptimize$V4<-NA
+
+#For loop that adds in all outcomes for each set of doubles.
+for(i in 1:6){
+DiceOptimize1<-as.data.frame(outcomes)
+DiceOptimize1$V3<-DiceOptimize1$V1
+DiceOptimize1$V4<-DiceOptimize1$V2
+DiceOptimize1$V1<-i
+DiceOptimize1$V2<-i
+DiceOptimize<- rbind(DiceOptimize,DiceOptimize1)
+}
+#remove double doubles
+DiceOptimize<-DiceOptimize[!(DiceOptimize$V1==DiceOptimize$V2 & DiceOptimize$V3==DiceOptimize$V4),]
+
+#A double For loop that adds in all outcomes for each second set of doubles.
+i<-1
+j<-1
+DiceOptimize$V5<-NA
+DiceOptimize$V6<-NA
+for(i in 1:6){
+  for(j in 1:6){
+  DiceOptimize1<-as.data.frame(outcomes)
+  DiceOptimize1$V3<-j
+  DiceOptimize1$V4<-j
+  DiceOptimize1$V5<-DiceOptimize1$V1
+  DiceOptimize1$V6<-DiceOptimize1$V2
+  DiceOptimize1$V1<-i
+  DiceOptimize1$V2<-i
+  DiceOptimize<- rbind(DiceOptimize,DiceOptimize1)
+}
+}
+
+#With all possible rolls you have the ability to get all outcomes.
+DiceOptimize$Roll1<-DiceOptimize$V1+DiceOptimize$V2
+DiceOptimize$Roll2<-DiceOptimize$V3+DiceOptimize$V4+DiceOptimize$V1+DiceOptimize$V2
+DiceOptimize$Roll3<-DiceOptimize$V5+DiceOptimize$V6+DiceOptimize$V1+DiceOptimize$V2+DiceOptimize$V3+DiceOptimize$V4
+
+#Now you pull in the value from gain based on outcomes
+i<-1
+for(i in 1:861){
+DiceOptimize$Value1[i] <- Monopoly$Gain[Monopoly$id==DiceOptimize$Roll1[i]]
+}
+i<-1
+for(i in 1:861){
+  DiceOptimize$Value2[i] <- Monopoly$Gain[Monopoly$id==DiceOptimize$Roll2[i]]
+}
+i<-1
+for(i in 1:861){
+  DiceOptimize$Value3[i] <- Monopoly$Gain[Monopoly$id==DiceOptimize$Roll3[i]]
+}
+
+#If you roll doubles three times you go to jail so that roll is ineffective for value
+DiceOptimize$Value3<- replace(DiceOptimize$Value3, which(DiceOptimize$V5==DiceOptimize$V6),NA)
+
+#Add up all values
+for(i in 1:861){
+DiceOptimize$TotalValue[i]<-sum(DiceOptimize$Value1[i],DiceOptimize$Value2[i],DiceOptimize$Value3[i], na.rm = TRUE)
+}
