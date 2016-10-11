@@ -1,0 +1,232 @@
+#How many rolls does it take to build complete color sets?
+#To do this I am going to simulate the first 400 rolls of a dice, and see how long it takes to finish each color set.
+#I will run that experiment 100 times so that I have a mean, median, min and max.
+
+#Some Repeat Code so that this is Standalone.
+#Chance card actions based on what chance you land on
+chanceOptions7    <- c(0,24,11,12,15,7,7,10,4,7,7,5,39,7,7,7)
+chanceOptions22   <- c(0,24,11,28,25,22,22,10,19,22,22,5,39,22,22,22)
+chanceOptions36   <- c(0,24,11,12,5,36,36,10,33,36,36,5,39,36,36,36)
+
+#Commmunity Chest card actions based on what Community Chest You land on
+comchestOptions2  <- c(0,2,2,2,2,10,2,2,2,2,2,2,2,2,2,2,2)
+comchestOptions17 <- c(0,17,17,17,17,10,17,17,17,17,17,17,17,17,17,17,17)
+comchestOptions33 <- c(0,33,33,33,33,10,33,33,33,33,33,33,33,33,33,33,33)
+
+#Dice Rolling Fuction
+two.dice<- function(){
+  dice <- sample(1:6, size = 2, replace = TRUE)
+  return(sum(dice))
+}
+
+
+#How long does it take to get a complete set of any color.
+#Reset Everything
+
+
+CompleteSet <- data.frame(DarkPurple=0, Cyan=0, Purple=0, Orange=0, Red=0, Yellow=0, Green=0, Blue=0)
+CompleteSet<-CompleteSet[-1,]
+
+for(j in 1:100){
+
+  MonopolyBoardComplete<-data.frame(space=0)  
+  
+#Initialize variables for movement around the board
+newSpace<-0
+currentSpace <- 0
+#Movement based on Chance and Community chest cards
+chance <-1
+comchest <-1
+#Tracking how often Chance, GoToJail, Community Chest spaces are landed on
+Chance7<-0
+Chance22<-0
+Chance36<-0
+ComChest2<-0
+ComChest17<-0
+ComChest33<-0
+GoToJail<-0
+JustVisiting<-0
+
+#Loop for simulation
+for(i in 1:400){
+  
+  #Creating a variable which will calculate next placement after roll.
+  newSpace <- currentSpace + two.dice()
+  
+  #If you passed go:
+  if(newSpace>39){newSpace=newSpace-40}
+  #If you landed on Chance:
+  if(newSpace==7){newSpace<-chanceOptions7[chance];chance<-chance+1;Chance7<-Chance7+1}
+  if(newSpace==22){newSpace<-chanceOptions22[chance];chance<-chance+1;Chance22<-Chance22+1}
+  if(newSpace==36){newSpace<-chanceOptions36[chance];chance<-chance+1;Chance36<-Chance36+1}
+  #If you landed on Community Chest
+  if(newSpace==2){newSpace<-comchestOptions2[comchest];comchest<-comchest+1;ComChest2<-ComChest2+1}
+  if(newSpace==17){newSpace<-comchestOptions17[comchest];comchest<-comchest+1;ComChest17<-ComChest17+1}
+  if(newSpace==33){newSpace<-comchestOptions33[comchest];comchest<-comchest+1;ComChest33<-ComChest33+1}
+  #If you landed on Go to Jail
+  if(newSpace==30){newSpace<-10;GoToJail<-GoToJail+1}
+  
+  #Reseting the Chance and Community chest cards
+  if(chance>16){chance<-1}
+  if(comchest>17){comchest<-1}
+  
+  #Keeping track of all landings on the board.
+  MonopolyBoardComplete<- rbind(MonopolyBoardComplete, data.frame(space=newSpace))
+  
+  #Reset before next loop
+  currentSpace<-newSpace
+} 
+
+#Find the first time each buyable space was landed on
+FirstDarkPurp1<-which(MonopolyBoardComplete$space==1)[1]
+FirstDarkPurp2<-which(MonopolyBoardComplete$space==3)[1]
+
+if(FirstDarkPurp1>FirstDarkPurp2){
+  DarkPurple<-FirstDarkPurp1
+}else{
+  DarkPurple<-FirstDarkPurp2
+}
+
+
+#Find the first time each buyable space was landed on
+FirstCyan1<-which(MonopolyBoardComplete$space==6)[1]
+FirstCyan2<-which(MonopolyBoardComplete$space==8)[1]
+FirstCyan3<-which(MonopolyBoardComplete$space==9)[1]
+
+if(FirstCyan1>FirstCyan2){
+  Cyan<-FirstCyan1
+}else{
+  Cyan<-FirstCyan2
+}
+if(FirstCyan3>Cyan){Cyan<-FirstCyan3}
+
+#Find the first time each buyable space was landed on
+FirstPurple1<-which(MonopolyBoardComplete$space==11)[1]
+FirstPurple2<-which(MonopolyBoardComplete$space==13)[1]
+FirstPurple3<-which(MonopolyBoardComplete$space==14)[1]
+
+if(FirstPurple1>FirstPurple2){
+  Purple<-FirstPurple1
+}else{
+  Purple<-FirstPurple2
+}
+if(FirstPurple3>Purple){Purple<-FirstPurple3}
+
+#Find the first time each buyable space was landed on
+FirstOrange1<-which(MonopolyBoardComplete$space==16)[1]
+FirstOrange2<-which(MonopolyBoardComplete$space==18)[1]
+FirstOrange3<-which(MonopolyBoardComplete$space==19)[1]
+
+if(FirstOrange1>FirstOrange2){
+  Orange<-FirstOrange1
+}else{
+  Orange<-FirstOrange2
+}
+if(FirstOrange3>Orange){Orange<-FirstOrange3}
+
+#Find the first time each buyable space was landed on
+FirstRed1<-which(MonopolyBoardComplete$space==21)[1]
+FirstRed2<-which(MonopolyBoardComplete$space==23)[1]
+FirstRed3<-which(MonopolyBoardComplete$space==24)[1]
+
+if(FirstRed1>FirstRed2){
+  Red<-FirstRed1
+}else{
+  Red<-FirstRed2
+}
+if(FirstRed3>Red){Red<-FirstRed3}
+
+#Find the first time each buyable space was landed on
+FirstYellow1<-which(MonopolyBoardComplete$space==26)[1]
+FirstYellow2<-which(MonopolyBoardComplete$space==27)[1]
+FirstYellow3<-which(MonopolyBoardComplete$space==29)[1]
+
+if(FirstYellow1>FirstYellow2){
+  Yellow<-FirstYellow1
+}else{
+  Yellow<-FirstYellow2
+}
+if(FirstYellow3>Yellow){Yellow<-FirstYellow3}
+
+#Find the first time each buyable space was landed on
+FirstGreen1<-which(MonopolyBoardComplete$space==31)[1]
+FirstGreen2<-which(MonopolyBoardComplete$space==32)[1]
+FirstGreen3<-which(MonopolyBoardComplete$space==34)[1]
+
+if(FirstGreen1>FirstGreen2){
+  Green<-FirstGreen1
+}else{
+  Green<-FirstGreen2
+}
+if(FirstGreen3>Green){Green<-FirstGreen3}
+
+#Find the first time each buyable space was landed on
+FirstBlue1<-which(MonopolyBoardComplete$space==37)[1]
+FirstBlue2<-which(MonopolyBoardComplete$space==39)[1]
+
+if(FirstBlue1>FirstBlue2){
+  Blue<-FirstBlue1
+}else{
+  Blue<-FirstBlue2
+}
+
+
+CompleteSet <- rbind(CompleteSet, data.frame(
+  DarkPurple=DarkPurple, Cyan=Cyan, Purple=Purple, Orange=Orange, Red=Red, Yellow=Yellow, Green=Green, Blue=Blue))
+
+}
+
+#Dataframe for analysis of Completing Sets of Color
+
+ColorName<- c(
+  "DarkPurple",
+  "Cyan",
+  "Purple",
+  "Orange",
+  "Red",
+  "Yellow",
+  "Green",
+  "Blue")
+
+
+ColorMin<- c(
+min(CompleteSet$DarkPurple),
+min(CompleteSet$Cyan),
+min(CompleteSet$Purple),
+min(CompleteSet$Orange),
+min(CompleteSet$Red),
+min(CompleteSet$Yellow),
+min(CompleteSet$Green),
+min(CompleteSet$Blue))
+
+ColorMax<- c(
+  max(CompleteSet$DarkPurple),
+  max(CompleteSet$Cyan),
+  max(CompleteSet$Purple),
+  max(CompleteSet$Orange),
+  max(CompleteSet$Red),
+  max(CompleteSet$Yellow),
+  max(CompleteSet$Green),
+  max(CompleteSet$Blue))
+
+ColorMedian<- c(
+  median(CompleteSet$DarkPurple),
+  median(CompleteSet$Cyan),
+  median(CompleteSet$Purple),
+  median(CompleteSet$Orange),
+  median(CompleteSet$Red),
+  median(CompleteSet$Yellow),
+  median(CompleteSet$Green),
+  median(CompleteSet$Blue))
+
+ColorMean<- c(
+  mean(CompleteSet$DarkPurple),
+  mean(CompleteSet$Cyan),
+  mean(CompleteSet$Purple),
+  mean(CompleteSet$Orange),
+  mean(CompleteSet$Red),
+  mean(CompleteSet$Yellow),
+  mean(CompleteSet$Green),
+  mean(CompleteSet$Blue))
+
+ColorStats<-data.frame(ColorName,ColorMin,ColorMedian,ColorMax,ColorMean)
